@@ -259,7 +259,7 @@ $("confirm").addEventListener("click",function(){
   all.push(booking);
   localStorage.setItem("nr_bookings",JSON.stringify(all));
 
-  var msg="Olá! Quero confirmar meu agendamento no Lava Jato N&R.%0A%0A"+
+  var msg="Olá! Quero confirmar meu agendamento no Lava Jato N%26R.%0A%0A"+
     "🚗 Serviço: "+encodeURIComponent(booking.service)+"%0A"+
     "📅 Data: "+encodeURIComponent(booking.dateText)+"%0A"+
     "🕐 Horário: "+encodeURIComponent(booking.time)+"%0A"+
