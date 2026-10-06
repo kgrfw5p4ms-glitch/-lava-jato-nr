@@ -6,321 +6,497 @@
 <title>Lava Jato N&R</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#07111f;color:#fff;font-family:Arial}
-main{max-width:520px;margin:auto;padding:20px 16px 40px}
-h1{text-align:center}h1 span{color:#28a9ff}
-.card{background:#0d1b2d;border:1px solid #1b3550;border-radius:16px;padding:16px;margin:12px 0}
-button,input{width:100%;padding:13px;border-radius:10px;font-size:16px}
-button{background:#101f33;color:#fff;border:2px solid #1d3854;margin:5px 0}
-button.selected{border-color:#25a9ff;background:#0d2941}
-button:disabled{opacity:.3}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-input{background:#081525;color:#fff;border:1px solid #29445f;margin:5px 0}
-.green{background:#19a765;border:0;font-weight:bold}
-.red{background:#b52b2b;border:0;font-weight:bold}
-.msg{text-align:center;color:#aebdce;font-size:13px}
+body{margin:0;font-family:Arial;background:#f2f2f2;color:#111}
+header{background:#111;color:#fff;text-align:center;padding:25px 15px}
+header h1{margin:0;font-size:28px}
+header p{margin:7px 0 0}
+main{max-width:600px;margin:20px auto;padding:15px}
+.box{background:#fff;padding:18px;margin-bottom:15px;border-radius:12px;box-shadow:0 2px 8px #0001}
+h2{margin-top:0}
+label{display:block;font-weight:bold;margin-top:12px}
+input,select,button{width:100%;padding:13px;margin-top:6px;border-radius:8px;border:1px solid #ccc;font-size:16px}
+button{border:0;background:#111;color:#fff;font-weight:bold;cursor:pointer}
+.verde{background:#168a3b}
+.vermelho{background:#c62828}
+.azul{background:#1769aa}
+.horarios{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.horarios button{background:#eee;color:#111;border:1px solid #ccc}
+.horarios button.ocupado{background:#bbb;color:#777;cursor:not-allowed}
+.horarios button.selecionado{background:#111;color:#fff}
+.msg{padding:12px;border-radius:8px;margin-top:12px;display:none}
+.agendamento{border:1px solid #ddd;padding:12px;border-radius:8px;margin-top:10px}
 </style>
 </head>
 
 <body>
+
+<header>
+<h1>🚗 Lava Jato N&R</h1>
+<p>Agende sua lavagem</p>
+</header>
+
 <main>
 
-<h1>LAVA JATO <span>N&R</span></h1>
-<p class="msg">Agende sua lavagem aos finais de semana</p>
+<div class="box">
+<h2>📅 Novo agendamento</h2>
 
-<div class="card">
-<h3>1. Escolha o serviço</h3>
+<label>Serviço</label>
+<select id="servico">
+<option value="">Selecione o serviço</option>
+<option value="Lavagem simples - Carro pequeno|30|60">Lavagem simples - Carro pequeno — R$ 30</option>
+<option value="Lavagem simples - Carro grande|35|90">Lavagem simples - Carro grande — R$ 35</option>
+<option value="Lavagem completa - Carro pequeno|40|90">Lavagem completa - Carro pequeno — R$ 40</option>
+<option value="Lavagem completa - Carro grande|45|120">Lavagem completa - Carro grande — R$ 45</option>
+</select>
 
-<button class="service" data-name="Lavagem simples - Carro pequeno" data-price="30" data-duration="60">
-Lavagem simples — Carro pequeno — R$30
-</button>
+<label>Data</label>
+<select id="data">
+<option value="">Selecione a data</option>
+</select>
 
-<button class="service" data-name="Lavagem simples - Carro grande" data-price="35" data-duration="90">
-Lavagem simples — Carro grande — R$35
-</button>
+<label>Horário</label>
+<div id="horarios" class="horarios"></div>
 
-<button class="service" data-name="Lavagem completa - Carro pequeno" data-price="40" data-duration="90">
-Lavagem completa — Carro pequeno — R$40
-</button>
+<label>Nome</label>
+<input id="nome" placeholder="Seu nome">
 
-<button class="service" data-name="Lavagem completa - Carro grande" data-price="45" data-duration="120">
-Lavagem completa — Carro grande — R$45
-</button>
+<label>WhatsApp</label>
+<input id="telefone" type="tel" placeholder="(11) 99999-9999">
+
+<button class="verde" onclick="agendar()">✅ Agendar lavagem</button>
+
+<div id="mensagem" class="msg"></div>
 </div>
 
-<div class="card">
-<h3>2. Escolha o dia</h3>
-<div id="days"></div>
-</div>
 
-<div class="card">
-<h3>3. Escolha o horário</h3>
-<div id="times" class="grid"></div>
-</div>
+<div class="box">
+<h2>🔄 Meu agendamento</h2>
 
-<div class="card">
-<h3>4. Seus dados</h3>
-<input id="name" placeholder="Seu nome">
-<input id="phone" placeholder="Seu WhatsApp">
-<button id="confirm" class="green" disabled>
-Confirmar pelo WhatsApp
-</button>
-</div>
+<label>WhatsApp usado no agendamento</label>
+<input id="telefoneBusca" type="tel" placeholder="(11) 99999-9999">
 
-<div class="card">
-<h3>Cancelar minha lavagem</h3>
-
-<input id="cancelPhone" placeholder="WhatsApp usado na reserva">
-
-<button id="cancel" class="red">
-Cancelar agendamento
+<button class="azul" onclick="buscarAgendamentos()">
+🔎 Buscar agendamento
 </button>
 
-<p id="cancelMsg" class="msg"></p>
+<div id="meusAgendamentos"></div>
 </div>
 
 </main>
 
 <script>
-"use strict";
 
-const KEY="nr_bookings";
-let service=null,day=null,time=null;
+/* NOVA AGENDA */
+const CHAVE="nr_bookings_novo";
 
-const $=id=>document.getElementById(id);
-const pad=n=>String(n).padStart(2,"0");
+let horarioSelecionado="";
 
-function dateKey(d){
-return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+
+function pegarAgendamentos(){
+  try{
+    return JSON.parse(localStorage.getItem(CHAVE)||"[]");
+  }catch(e){
+    return [];
+  }
 }
 
-function dateLabel(d){
-return ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"][d.getDay()]
-+" • "+pad(d.getDate())+"/"+pad(d.getMonth()+1);
+
+function salvarAgendamentos(lista){
+  localStorage.setItem(CHAVE,JSON.stringify(lista));
 }
 
-function bookings(){
-try{return JSON.parse(localStorage.getItem(KEY)||"[]")}
-catch(e){return[]}
+
+function mensagem(txt,erro=false){
+  const m=document.getElementById("mensagem");
+  m.innerHTML=txt;
+  m.style.display="block";
+  m.style.background=erro?"#ffd6d6":"#d9f7df";
 }
 
-function save(x){
-localStorage.setItem(KEY,JSON.stringify(x));
+
+/* DATAS */
+
+function carregarDatas(){
+
+  const s=document.getElementById("data");
+  const hoje=new Date();
+
+  for(let i=0;i<21;i++){
+
+    const d=new Date();
+    d.setDate(hoje.getDate()+i);
+
+    if(d.getDay()!=6 && d.getDay()!=0) continue;
+
+    const valor=d.toISOString().split("T")[0];
+
+    let texto=d.toLocaleDateString("pt-BR",{
+      weekday:"long",
+      day:"2-digit",
+      month:"2-digit",
+      year:"numeric"
+    });
+
+    texto=texto.charAt(0).toUpperCase()+texto.slice(1);
+
+    const o=document.createElement("option");
+
+    o.value=valor;
+    o.textContent=texto;
+
+    s.appendChild(o);
+  }
 }
 
-function isBooked(t){
-return bookings().some(b=>b.date==dateKey(day)&&b.time==t);
-}
+document.getElementById("data").onchange=mostrarHorarios;
 
-/* DIAS */
-
-let today=new Date();
-today.setHours(0,0,0,0);
-
-for(let i=0;i<21;i++){
-
-let d=new Date(today);
-d.setDate(today.getDate()+i);
-
-if(d.getDay()==0||d.getDay()==6){
-
-let b=document.createElement("button");
-b.textContent=dateLabel(d);
-
-b.onclick=()=>{
-document.querySelectorAll("#days button")
-.forEach(x=>x.classList.remove("selected"));
-
-b.classList.add("selected");
-day=d;
-time=null;
-$("confirm").disabled=true;
-renderTimes();
-};
-
-$("days").appendChild(b);
-}
-}
-
-/* SERVIÇOS */
-
-document.querySelectorAll(".service").forEach(b=>{
-
-b.onclick=()=>{
-
-document.querySelectorAll(".service")
-.forEach(x=>x.classList.remove("selected"));
-
-b.classList.add("selected");
-
-service={
-name:b.dataset.name,
-price:+b.dataset.price,
-duration:+b.dataset.duration
-};
-
-time=null;
-$("confirm").disabled=true;
-renderTimes();
-
-};
-
-});
 
 /* HORÁRIOS */
 
-function renderTimes(){
+function gerarHorarios(){
 
-$("times").innerHTML="";
+  const h=[];
 
-if(!day||!service)return;
+  for(let hora=8;hora<16;hora++){
 
-let close=day.getDay()==6?960:900;
+    h.push(String(hora).padStart(2,"0")+":00");
+    h.push(String(hora).padStart(2,"0")+":30");
 
-for(let t=480;t+service.duration<=close;t+=30){
+  }
 
-let h=pad(Math.floor(t/60))+":"+pad(t%60);
-
-let b=document.createElement("button");
-b.textContent=h;
-b.disabled=isBooked(h);
-
-b.onclick=()=>{
-
-document.querySelectorAll("#times button")
-.forEach(x=>x.classList.remove("selected"));
-
-b.classList.add("selected");
-time=h;
-$("confirm").disabled=false;
-
-};
-
-$("times").appendChild(b);
+  return h;
 }
+
+
+function mostrarHorarios(){
+
+  const data=document.getElementById("data").value;
+  const area=document.getElementById("horarios");
+
+  area.innerHTML="";
+  horarioSelecionado="";
+
+  if(!data)return;
+
+  let horarios=gerarHorarios();
+
+  const dia=new Date(data+"T12:00:00").getDay();
+
+  /* DOMINGO ATÉ 15H */
+  if(dia===0)
+    horarios=horarios.filter(h=>h<="15:00");
+
+  const reservas=pegarAgendamentos();
+
+  horarios.forEach(h=>{
+
+    const ocupado=reservas.some(a=>
+      a.date===data && a.time===h
+    );
+
+    const b=document.createElement("button");
+
+    b.textContent=ocupado?h+" 🔒":h;
+
+    if(ocupado){
+
+      b.disabled=true;
+      b.className="ocupado";
+
+    }else{
+
+      b.onclick=()=>{
+
+        document
+        .querySelectorAll(".horarios button")
+        .forEach(x=>x.classList.remove("selecionado"));
+
+        b.classList.add("selecionado");
+
+        horarioSelecionado=h;
+      };
+    }
+
+    area.appendChild(b);
+  });
 }
+
 
 /* AGENDAR */
 
-$("confirm").onclick=()=>{
+function agendar(){
 
-let name=$("name").value.trim();
-let phone=$("phone").value.trim();
+  const servico=document.getElementById("servico").value;
+  const data=document.getElementById("data").value;
+  const nome=document.getElementById("nome").value.trim();
+  const telefone=document.getElementById("telefone").value.trim();
 
-if(!service||!day||!time||!name||!phone){
-alert("Preencha todos os dados.");
-return;
+  if(!servico || !data || !horarioSelecionado || !nome || !telefone){
+
+    mensagem(
+      "Preencha todos os campos e escolha um horário.",
+      true
+    );
+
+    return;
+  }
+
+  const dados=servico.split("|");
+
+  const service=dados[0];
+  const price=Number(dados[1]);
+  const duration=Number(dados[2]);
+
+  const lista=pegarAgendamentos();
+
+  if(lista.some(a=>
+    a.date===data &&
+    a.time===horarioSelecionado
+  )){
+
+    mensagem(
+      "Esse horário já foi ocupado.",
+      true
+    );
+
+    mostrarHorarios();
+
+    return;
+  }
+
+  const d=new Date(data+"T12:00:00");
+
+  const dateText=d.toLocaleDateString("pt-BR",{
+    weekday:"long",
+    day:"2-digit",
+    month:"2-digit",
+    year:"numeric"
+  });
+
+  const agendamento={
+    id:Date.now(),
+    service:service,
+    price:price,
+    duration:duration,
+    date:data,
+    dateText:dateText,
+    time:horarioSelecionado,
+    name:nome,
+    phone:telefone
+  };
+
+  lista.push(agendamento);
+
+  salvarAgendamentos(lista);
+
+
+  const msg=
+    "Olá! Quero confirmar meu agendamento no Lava Jato N&R.%0A%0A"+
+    "🚗 Serviço: "+encodeURIComponent(service)+"%0A"+
+    "📅 Data: "+encodeURIComponent(dateText)+"%0A"+
+    "🕐 Horário: "+encodeURIComponent(horarioSelecionado)+"%0A"+
+    "💰 Valor: R$ "+price.toFixed(2).replace(".",",")+"%0A"+
+    "👤 Nome: "+encodeURIComponent(nome)+"%0A"+
+    "📱 WhatsApp: "+encodeURIComponent(telefone);
+
+
+  mensagem(
+    "✅ Agendamento realizado!<br><br>"+
+    '<button onclick="window.open(\'https://wa.me/5511965944083?text='+msg+'\',\'_blank\')">'+
+    '📲 Confirmar pelo WhatsApp</button>'
+  );
+
+  horarioSelecionado="";
+
+  mostrarHorarios();
 }
 
-if(isBooked(time)){
-alert("Esse horário já foi reservado.");
-renderTimes();
-return;
+
+/* BUSCAR AGENDAMENTO */
+
+function buscarAgendamentos(){
+
+  const telefone=
+    document.getElementById("telefoneBusca").value.trim();
+
+  const area=
+    document.getElementById("meusAgendamentos");
+
+  area.innerHTML="";
+
+  if(!telefone){
+
+    area.innerHTML=
+      "<p>Digite seu WhatsApp.</p>";
+
+    return;
+  }
+
+  const lista=pegarAgendamentos();
+
+  const encontrados=
+    lista.filter(a=>a.phone===telefone);
+
+
+  if(!encontrados.length){
+
+    area.innerHTML=
+      "<p>Nenhum agendamento encontrado.</p>";
+
+    return;
+  }
+
+
+  encontrados.forEach(a=>{
+
+    const div=document.createElement("div");
+
+    div.className="agendamento";
+
+    div.innerHTML=`
+
+      <b>🚗 ${a.service}</b><br>
+      📅 ${a.dateText}<br>
+      🕐 ${a.time}<br>
+      💰 R$ ${a.price.toFixed(2).replace(".",",")}<br>
+      👤 ${a.name}<br><br>
+
+      <button class="azul"
+      onclick="remarcar(${a.id})">
+      🔄 Remarcar lavagem
+      </button>
+
+      <button class="vermelho"
+      onclick="cancelar(${a.id})">
+      ❌ Cancelar lavagem
+      </button>
+
+    `;
+
+    area.appendChild(div);
+  });
 }
 
-let booking={
-id:Date.now(),
-name:name,
-phone:phone,
-service:service.name,
-price:service.price,
-date:dateKey(day),
-dateText:dateLabel(day),
-time:time
-};
-
-let all=bookings();
-all.push(booking);
-save(all);
-
-let msg=
-"Olá! Quero confirmar meu agendamento no Lava Jato.%0A%0A"+
-"🚗 Serviço: "+encodeURIComponent(booking.service)+"%0A"+
-"📅 Data: "+encodeURIComponent(booking.dateText)+"%0A"+
-"🕐 Horário: "+encodeURIComponent(booking.time)+"%0A"+
-"💰 Valor: R$ "+booking.price.toFixed(2).replace(".",",")+"%0A"+
-"👤 Nome: "+encodeURIComponent(booking.name)+"%0A"+
-"📱 WhatsApp: "+encodeURIComponent(booking.phone);
-
-location.href=
-"https://wa.me/5511965944083?text="+msg;
-};
 
 /* CANCELAR */
 
-$("cancel").onclick=()=>{
+function cancelar(id){
 
-let phone=$("cancelPhone").value.trim();
+  const lista=pegarAgendamentos();
 
-if(!phone){
-$("cancelMsg").textContent=
-"Digite o WhatsApp usado na reserva.";
-return;
+  const ag=
+    lista.find(a=>a.id===id);
+
+  if(!ag)return;
+
+
+  if(!confirm(
+    "Tem certeza que deseja cancelar sua lavagem?"
+  ))return;
+
+
+  const novaLista=
+    lista.filter(a=>a.id!==id);
+
+  salvarAgendamentos(novaLista);
+
+
+  alert(
+    "✅ Lavagem cancelada!\n\n"+
+    "O horário "+ag.time+
+    " está disponível novamente."
+  );
+
+
+  /* ATUALIZA OS HORÁRIOS */
+  mostrarHorarios();
+
+  /* ATUALIZA OS AGENDAMENTOS */
+  buscarAgendamentos();
 }
 
-let all=bookings();
 
-let minhas=all.filter(b=>
-b.phone.replace(/\D/g,"")==
-phone.replace(/\D/g,"")
-);
+/* REMARCAR */
 
-if(!minhas.length){
-$("cancelMsg").textContent=
-"Nenhum agendamento encontrado para esse WhatsApp.";
-return;
+function remarcar(id){
+
+  const lista=pegarAgendamentos();
+
+  const ag=
+    lista.find(a=>a.id===id);
+
+  if(!ag)return;
+
+
+  /* REMOVE O HORÁRIO ANTIGO */
+  const novaLista=
+    lista.filter(a=>a.id!==id);
+
+  salvarAgendamentos(novaLista);
+
+
+  /* PREENCHE O FORMULÁRIO */
+  document.getElementById("servico").value=
+    acharServico(ag);
+
+  document.getElementById("data").value=
+    ag.date;
+
+  document.getElementById("nome").value=
+    ag.name;
+
+  document.getElementById("telefone").value=
+    ag.phone;
+
+
+  /* MOSTRA OS HORÁRIOS LIVRES */
+  mostrarHorarios();
+
+
+  document.getElementById("data")
+  .scrollIntoView({
+    behavior:"smooth"
+  });
+
+
+  alert(
+    "🔄 Remarcação iniciada!\n\n"+
+    "Escolha um novo horário e clique em Agendar."
+  );
+
+
+  buscarAgendamentos();
 }
 
-if(minhas.length==1){
 
-let b=minhas[0];
+/* ENCONTRAR SERVIÇO */
 
-if(confirm(
-"Cancelar a lavagem de "+b.dateText+
-" às "+b.time+"?"
-)){
+function acharServico(ag){
 
-save(all.filter(x=>x.id!==b.id));
+  const op=
+    document.getElementById("servico").options;
 
-$("cancelMsg").textContent=
-"Agendamento cancelado com sucesso.";
+  for(let i=0;i<op.length;i++){
 
-renderTimes();
+    const p=
+      op[i].value.split("|");
 
+    if(
+      p[0]===ag.service &&
+      Number(p[1])===Number(ag.price)
+    ){
+      return op[i].value;
+    }
+  }
+
+  return "";
 }
 
-return;
-}
 
-let texto="Foram encontrados vários agendamentos:\n\n";
+/* INICIAR */
 
-minhas.forEach((b,i)=>{
-texto+=(i+1)+" - "+b.dateText+" às "+b.time+"\n";
-});
+carregarDatas();
 
-let escolha=prompt(
-texto+"\nDigite o número do agendamento que deseja cancelar:"
-);
-
-let index=Number(escolha)-1;
-
-if(minhas[index]){
-
-save(all.filter(x=>x.id!==minhas[index].id));
-
-$("cancelMsg").textContent=
-"Agendamento cancelado com sucesso.";
-
-renderTimes();
-
-}else{
-
-$("cancelMsg").textContent=
-"Agendamento não encontrado.";
-
-}
-
-};
 </script>
 
 </body>
