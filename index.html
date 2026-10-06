@@ -260,12 +260,12 @@ $("confirm").addEventListener("click",function(){
   localStorage.setItem("nr_bookings",JSON.stringify(all));
 
   var msg="Olá! Quero confirmar meu agendamento no Lava Jato.%0A%0A"+
-    "🚗 Serviço: "+encodeURIComponent(booking.service)+"%0A"+
-    "📅 Data: "+encodeURIComponent(booking.dateText)+"%0A"+
-    "🕐 Horário: "+encodeURIComponent(booking.time)+"%0A"+
-    "💰 Valor: R$ "+booking.price.toFixed(2).replace(".",",")+"%0A"+
-    "👤 Nome: "+encodeURIComponent(booking.name)+"%0A"+
-    "📱 WhatsApp: "+encodeURIComponent(booking.phone);
+"🚗 Serviço: "+encodeURIComponent(booking.service)+"%0A"+
+"📅 Data: "+encodeURIComponent(booking.dateText)+"%0A"+
+"🕐 Horário: "+encodeURIComponent(booking.time)+"%0A"+
+"💰 Valor: R$ "+booking.price.toFixed(2).replace(".",",")+"%0A"+
+"👤 Nome: "+encodeURIComponent(booking.name)+"%0A"+
+"📱 WhatsApp: "+encodeURIComponent(booking.phone);
 
   window.location.href="https://wa.me/5511965944083?text="+msg;
 });
