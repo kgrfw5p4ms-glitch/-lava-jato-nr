@@ -570,7 +570,11 @@ function agendar(){
 
 
   const msg=
-    "Olá! Quero confirmar o meu agendamento no Lava Jato N%26R";
+  "Olá! Quero confirmar o meu agendamento no Lava Jato N%26R 🔥🚗.%0A%0A"+
+  "🚗 Serviço: "+encodeURIComponent(service)+"%0A"+
+  "👤 Nome: "+encodeURIComponent(nome)+"%0A"+
+  "🕐 Horário: "+encodeURIComponent(horarioSelecionado)+"%0A"+
+  "💰 Valor: R$ "+price.toFixed(2).replace(".",",");
 
 
   mensagem(
